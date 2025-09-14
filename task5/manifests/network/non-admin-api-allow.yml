@@ -1,0 +1,120 @@
+---
+# Запрет всего трафика по умолчанию
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: tenant
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
+---
+# Разрешение DNS-запросов
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: tenant
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns   # или coredns, смотри у себя
+      ports:
+        - protocol: UDP
+          port: 53
+---
+# Разрешение front-end -> back-end-api
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend-api
+  namespace: tenant
+spec:
+  podSelector:
+    matchLabels:
+      role: back-end-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: front-end
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# Ограничение egress front-end (только к back-end-api)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-egress-only-backend
+  namespace: tenant
+spec:
+  podSelector:
+    matchLabels:
+      role: front-end
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              role: back-end-api
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# Разрешение admin-front-end -> admin-back-end-api
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-admin-frontend-to-admin-backend-api
+  namespace: tenant
+spec:
+  podSelector:
+    matchLabels:
+      role: admin-back-end-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: admin-front-end
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# Ограничение egress admin-front-end (только к admin-back-end-api)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-frontend-egress-only-admin-backend
+  namespace: tenant
+spec:
+  podSelector:
+    matchLabels:
+      role: admin-front-end
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              role: admin-back-end-api
+      ports:
+        - protocol: TCP
+          port: 80

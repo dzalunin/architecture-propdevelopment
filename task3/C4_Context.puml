@@ -1,0 +1,37 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_LEFT_RIGHT()
+
+Person(owner, "Собственник", "Пользуется мобильным приложением для оплаты, уведомлений и управления доступом")
+
+System_Boundary(pd, "Группа сервисов PropDevelopment") {
+  System(mobile, "Мобильное приложение собственника", "iOS/Android")
+  System(core, "tenant-core-app", "Приложение для предоставления услуг собственника")
+  System(crm, "CRM", "Система управления данными собственников")
+  System(auth, "auth-service-1", "Сервис аутентификации и авторизации (Keycloak, OIDC/OAuth2)")
+  System(smart_adapter, "Интеграционный сервис для платформы Умный дом", "Адаптер для внешнего API")
+  SystemQueue(mq, "Kafka/RabbitMQ", "Внутренняя шина событий")
+  System(audit, "Журнал безопасности", "Хранение событий аудита и аутентификации")
+}
+
+System_Ext(pay, "Платёжная система", "Оплата услуг")
+System_Ext(partner, "Партнёрская платформа Умный Дом", "Домофон (Face ID), шлагбаум (ANPR)")
+
+Rel(owner, mobile, "Взаимодействие через мобильное приложение")
+Rel(mobile, core, "Работа с функциональностью", "HTTPS + OIDC")
+Rel(mobile, auth, "Аутентификация и авторизация", "OIDC/OAuth2")
+
+Rel(core, crm, "Получение клиентских данных", "REST, mTLS")
+Rel(core, smart_adapter, "Создание/отзыв прав доступа на объект", "REST, mTLS")
+Rel(core, pay, "Работа с платежными операциями", "REST, mTLS")
+
+Rel(smart_adapter, partner, "Отправка команды открыть/закрыть", "mTLS + OAuth2 (Client Credentials)")
+Rel(partner, smart_adapter, "Webhook: доступ разрешён/отказ", "mTLS + подпись события")
+
+Rel(smart_adapter, mq, "Публикация событий доступа")
+Rel(mq, audit, "Передача событий для хранения")
+Rel(auth, audit, "Фиксация событий входа/выхода")
+
+@enduml

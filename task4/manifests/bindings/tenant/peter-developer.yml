@@ -1,0 +1,16 @@
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: peter-developer
+  namespace: tenant
+subjects:
+- kind: ServiceAccount
+  name: peter
+  namespace: tenant
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io

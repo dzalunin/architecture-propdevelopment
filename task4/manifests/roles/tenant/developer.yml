@@ -1,0 +1,27 @@
+﻿---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: tenant
+rules:
+  # Права на управление workloads
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Права на просмотр и отладку pod'ов
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  # Права только на чтение configmaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Права на просмотр services и persistentvolumeclaims
+  - apiGroups: [""]
+    resources: ["services", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
