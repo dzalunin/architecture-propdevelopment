@@ -1,0 +1,33 @@
+﻿---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: admin
+  namespace: data
+rules:
+  # 1. Права на основные ресурсы
+  - apiGroups: [""] # Core API group
+    resources: ["pods", "services", "endpoints", "persistentvolumeclaims", "configmaps", "events", "limitranges", "resourcequotas"]
+    verbs: ["*"]
+  - apiGroups: ["apps"] # Apps API group
+    resources: ["deployments", "daemonsets", "replicasets", "statefulsets"]
+    verbs: ["*"]
+  - apiGroups: ["batch"] # Batch API group
+    resources: ["jobs", "cronjobs"]
+    verbs: ["*"]
+  - apiGroups: ["autoscaling"] # Autoscaling API group
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["*"]
+  # 2. Права на сетевые ресурсы
+  - apiGroups: ["networking.k8s.io", "extensions"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["*"]
+  # 3. Права на политики
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["*"]
+  # 4. Права на взаимодействие с pod'ами
+  - apiGroups: [""]
+    resources: ["pods/log", "pods/exec", "pods/portforward"]
+    verbs: ["get", "list", "watch", "create"]

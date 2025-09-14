@@ -1,0 +1,7 @@
+﻿---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: john # Имя аккаунта в Kubernetes
+  namespace: default # ServiceAccount создается в namespace default

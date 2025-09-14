@@ -1,0 +1,7 @@
+﻿---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alice
+  namespace: tenant
